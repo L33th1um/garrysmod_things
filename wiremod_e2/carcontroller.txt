@@ -1,0 +1,23 @@
+@name CarController by badassplov
+@inputs W A S D Shift Active E:entity
+@outputs 
+@persist C 
+@strict
+runOnTick(1)
+if(first() | duped()) {
+    C = 1
+}
+while(C == 1 && E:isValid()) 
+{
+    E:soundPlay(1337,9999,"simulated_vehicles/v8elite/v8elite_mid.wav") # simulated_vehicles/jalopy/jalopy_high.wav    
+    C = 0
+}
+if(E:isValid()) {
+    soundPitch(1337,sqrt(abs(E:toLocalAxis(E:vel()):y()*255)/20) + 20)
+    soundVolume(1337, Active)
+    E:applyForce(-E:vel()*E:mass()/25)
+    E:applyForce(-E:vel()*E:mass() * !Active)
+    E:applyForce(E:right()*(W-S + Shift)*50*E:mass()) #:rotate(E:angles())
+    
+    E:applyTorque(vec(0,0,(A-D)*45)*E:mass()*50-E:angVelVector()*E:mass()*20)
+}

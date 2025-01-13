@@ -1,0 +1,62 @@
+@name
+@persist Target:entity OldTarget:entity
+
+
+function void gotoPos(Pos:vector, Prop:entity){
+    Prop:applyForce((((Pos-Prop:pos())*10) - Prop:vel())*Prop:mass())
+    Prop:propSetVelocityInstant((((Pos-Prop:pos())*10))*Prop:mass())
+    Prop:setPos(Pos)
+}
+
+interval(100)
+if (first()|dupefinished()){
+    dsJoinGroup("Security")
+    dsSetScope(2)
+    
+    Target = noentity()
+}
+
+
+Weapon = owner():weapon():type()
+
+if (Weapon == "weapon_ar2"){
+    Class = "prop_combine_ball"
+}
+elseif(Weapon == "weapon_frag"){
+    Class = "npc_grenade_frag"
+}
+else{
+    Class = "crossbow_bolt"
+}
+
+if (owner():keyZoom()){
+    Target = owner():aimEntity()
+    if (Target != OldTarget){
+        if (Target){
+            hint("Aimed at: "+Target:type(),8)
+        }
+    }
+    OldTarget = Target
+}
+
+if (dsClk("KillAll")){
+    Ent = dsGetEntity()
+    if (Ent == owner()){
+        Target = owner()
+    }
+}
+
+#print(Weapon)
+#findInSphere(entity():pos(),1000)
+
+findByClass(Class)
+Ents = findToArray()
+
+for (X=1,Ents:count()){
+    Ent = Ents[X,entity]
+    if (Ent != entity()&Target){
+        Height = vec(0,0,Target:height()/2)
+        gotoPos(Target:pos() + Height,Ent)
+        #print(Ent:type())
+    }
+}

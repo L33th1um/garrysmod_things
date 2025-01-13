@@ -1,0 +1,85 @@
+@name illudo supreme by badassplov
+@inputs Fire
+@outputs 
+@persist Mode RAng:number Vec:vector Ply:entity
+
+runOnTick(1)
+
+if(first() | duped()) 
+{
+    holoCreate(1)
+    holoScale(1,vec(7,7,0.1))
+    holoModel(1,"hq_cylinder")
+    holoMaterial(1,"shadertest/cubemapdemo") #models/shadertest/vertexlittranslucenttexture
+    holoColor(1,vec(255,0,0))
+    holoPos(1,vec(0,0,0))
+    holoAng(1,ang(0,0,0))
+    holoCreate(2)
+    holoParent(2,1)
+    holoScale(2,vec(7,7,3))
+    holoPos(2,vec(0,0,20))
+    holoAng(2,ang(180,0,0))
+    holoModel(2,"hq_tube_thin")
+    holoMaterial(2,"models/props_combine/portalball001_sheet")
+    holoColor(2,vec(255,0,0))
+}
+
+Space = owner():keyJump()
+Shift = owner():keySprint()
+Ctrl = owner():keyDuck()
+Alt = owner():keyWalk()
+W = owner():keyForward()
+S = owner():keyBack()
+A = owner():keyLeft()
+D = owner():keyRight()
+
+holoColor(1,hsv2rgb((curtime()*50)%360,1,1))
+holoColor(2,hsv2rgb((curtime()*50)%360,1,1))    
+
+if(owner():keyPressed("M") && changed(owner():keyPressed("M"))) 
+{
+    Mode = !Mode
+    if(!Mode) 
+    {
+        hint("Mode: dispareo", 8)    
+    }
+    if(Mode) 
+    {
+        hint("Mode: illudo", 8)    
+    } #dispareo
+}
+
+
+Ang = ang(0,owner():eyeAngles():yaw(),0) # gets owner's eyes angles
+RAng += 10
+
+if(owner():keyZoom() && owner():aimEntity():isValid()) { # when i press bind
+    Ply = owner():aimEntity()
+    hint(owner():aimEntity():type(),8)
+}
+
+if(Fire) { # when i press bind
+    if(Mode) {
+        if(Ply:isValid()) {
+            Victim = Ply:pos()
+            NewPos = Victim + vec(200 * cos(RAng), 200 * sin(RAng), 0)
+            Y = atan2( -NewPos:y() + Victim:y(), -NewPos:x() + Victim:x() ) * 180 / pi()
+            SAng = ang(owner():eyeAngles():pitch(), Y, 0)
+            owner():setEyeAngles(SAng)
+            owner():setVel(vec(0,0,0))
+            owner():setPos(NewPos)  
+        }
+    }
+    if(!Mode) 
+    {
+        Victim = Ply:pos()
+        NewPos = Victim + vec(-75,0,0):rotate(ang(0,Ply:eyeAngles():yaw(),0))
+        SAng = ang(owner():eyeAngles():pitch(), Ply:eyeAngles():yaw(), 0)
+        owner():setEyeAngles(SAng)
+        owner():setVel(vec(0,0,0))
+        owner():setPos(NewPos)
+    }
+}
+
+holoPos(1,owner():pos())
+

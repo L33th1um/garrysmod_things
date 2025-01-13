@@ -1,0 +1,25 @@
+@name infernal crowbar by badassplov
+@persist A I Ents:table
+interval(10)
+
+if(owner():weapon():type() == "weapon_crowbar" && owner():keyAttack1() && changed(owner():keyAttack1())) 
+{
+    owner():weapon():setMaterial("overlays/shorewave002a")
+    owner():weapon():setColor(vec(255,0,0))
+    Tr = owner():eyeTrace()
+    findClearWhiteClassList()
+    findIncludeClass("player")
+    findExcludePlayer(owner():name())
+    findInSphere(Tr:position(),200)
+    Ents = findToTable()
+    I = Ents:count()
+}
+if(Ents:count() > 0 && I > 0) 
+{
+    #I = (I)%Ents:count() + 1
+    E = propSpawn("models/props_phx/ww2bomb.mdl",Ents[I,entity]:pos(),1)    
+    E:propBreak()
+    I--
+}
+
+

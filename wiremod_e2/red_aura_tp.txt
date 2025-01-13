@@ -1,0 +1,103 @@
+@name red aura by badassplov
+@inputs Pod:entity Fire
+@outputs 
+@persist Show Mode RGB Vec:vector Ply:entity
+
+runOnTick(1)
+
+if(first() | duped()) 
+{
+    holoCreate(1)
+    holoScale(1,vec(7,7,0.1))
+    holoModel(1,"hq_cylinder")
+    holoMaterial(1,"overlays/shorewave002a") #models/shadertest/vertexlittranslucenttexture
+    holoColor(1,vec(255,0,0))
+    holoPos(1,vec(0,0,0))
+    holoAng(1,ang(0,0,0))
+    holoCreate(2)
+    holoParent(2,1)
+    holoScale(2,vec(7,7,3))
+    holoPos(2,vec(0,0,20))
+    holoAng(2,ang(180,0,0))
+    holoModel(2,"hq_tube_thin")
+    holoMaterial(2,"models/props_combine/portalball001_sheet")
+    holoColor(2,vec(255,0,0))
+}
+
+Space = owner():keyJump()
+Shift = owner():keySprint()
+Ctrl = owner():keyDuck()
+Alt = owner():keyWalk()
+W = owner():keyForward()
+S = owner():keyBack()
+A = owner():keyLeft()
+D = owner():keyRight()
+
+if(owner():keyPressed("K") && changed(owner():keyPressed("K"))) 
+{
+    RGB = !RGB
+    if(!RGB) 
+    {
+        hint("RGB off", 8)    
+    }
+    if(RGB) 
+    {
+        hint("RGB on", 8)    
+    } 
+}
+if(RGB) 
+{
+    holoColor(1,hsv2rgb((curtime()*50)%360,1,1))
+    holoColor(2,hsv2rgb((curtime()*50)%360,1,1))    
+}
+
+if(owner():keyPressed("M") && changed(owner():keyPressed("M"))) 
+{
+    Mode = !Mode
+    if(!Mode) 
+    {
+        hint("Mode: illudo", 8)    
+    }
+    if(Mode) 
+    {
+        hint("Mode: amoveo", 8)    
+    } #dispareo
+}
+
+Ang = ang(0,owner():eyeAngles():yaw(),0) # gets owner's eyes angles
+Pod = entity():isWeldedTo()
+
+if(owner():keyZoom() && owner():aimEntity():isValid()) { # when i press bind
+    Ply = owner():aimEntity()
+    hint(owner():aimEntity():type(),8)
+}
+
+if(Fire && ~Fire) { # when i press bind
+    if(Mode) {
+        Pod:setAng(Ang) # sets pod's angles to match owner's angles
+        Pod:setPos(owner():pos() + vec((W-S)*300 - Alt * (W-S) * 150 + Shift * (W-S) * 300,(A-D)*300 - Alt * (A-D) * 150,(Space-Ctrl)*100):rotate(Ang) + vec(70,0,0):rotate(Ang)) # teleports pod to specified position according to buttons pressed (W, S - forward and back; A, D - left and right)
+        Pod:use() # owner uses pod (and teleports to it)
+        timer("teleeject",100)
+    }
+    if(!Mode)
+    {
+        if(Ply:isValid()) {
+            Victim = Ply:pos()
+            RAng = random(360)
+            NewPos = Victim + vec(200 * cos(RAng), 200 * sin(RAng), 0)
+            Y = atan2( -NewPos:y() + Victim:y(), -NewPos:x() + Victim:x() ) * 180 / pi()
+            SAng = ang(0, Y, 0)
+            Pod:setAng(SAng) # sets pod's angles to match owner's angles
+            Pod:setPos(NewPos) # teleports pod to specified position according to buttons pressed (W, S - forward and back; A, D - left and right)
+            Pod:use() # owner uses pod (and teleports to it)
+            timer("teleeject",250)    
+        }
+    }
+}
+
+holoPos(1,owner():pos())
+
+if(clk("teleeject")) 
+{
+    Pod:ejectPod() # owner leaves pod
+}

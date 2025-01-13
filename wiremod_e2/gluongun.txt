@@ -1,0 +1,115 @@
+@name gluongun
+@inputs Ent:entity
+@persist LastVic:entity [E O Base Pivot]:entity I NumHolo Hold T Roll C
+runOnTick(1)
+if(first() | duped()) {
+    Ent:setPos(owner():attachmentPos("anim_attachment_RH") + vec(480,0,0):rotate(owner():eyeAngles()))
+    Ent:setAng(owner():eyeAngles() - ang(90,0,180)) 
+    Ent:parentToAttachment(owner(),"anim_attachment_RH")
+    E=entity()
+    O=owner()
+    Pivot=holoCreate(0)
+    
+    holoParent(0,E)
+    holoAlpha(0,0)
+    
+    Base=holoCreate(1,E:pos(),vec(0.3,0.3,1),ang(90,0,0),vec(200),"hq_tube")
+    holoParent(1,0)
+    
+    I = 2
+    NumHolo = 15
+    Hold=1
+    function entity holoStyle(Index,Position:vector,Scale:vector,Angle:angle,Colour:vector,Model:string)
+        {
+            holoPos(Index,Position) holoScale(Index,Scale) holoAng(Index,Angle) holoColor(Index,Colour) holoModel(Index,Model) 
+            return holoEntity(Index)   
+        }
+}
+elseif(I <= NumHolo & holoCanCreate() & I > 0){
+    holoCreate(I) holoScale(I,vec())
+    I++   
+}
+elseif(I > NumHolo & I > 0){
+    
+    holoStyle(10,Base:toWorld(vec(0,0,-8)),vec(0.75,0.75,1),Base:toWorld(ang()),vec(150),"hq_cylinder")
+    holoStyle(6,Base:toWorld(vec(0,0,15)),vec(0.6,0.6,2),Base:toWorld(ang()),vec(69),"hq_cylinder")
+    holoStyle(12,Base:toWorld(vec(-5,0,2)),vec(0.1,0.1,0.5),Base:toWorld(ang(90,0,0)),vec(150),"hq_cylinder")
+    holoStyle(5,Base:toWorld(vec(0,-5,-10)),vec(0.1,0.1,0.5),Base:toWorld(ang(0,0,90)),vec(150),"hq_cylinder")    
+    holoStyle(14,Base:toWorld(vec(2,0,28)),vec(0.2,0.2,0.2),Base:toWorld(ang(0,0,90)),vec(150),"hq_torus")
+    holoStyle(15,Base:toWorld(vec(2,0,28)),vec(0.05,0.05,0.1),Base:toWorld(ang(-60,0,0)),vec(150),"cube")
+    for(I=2,9){
+        holoParent(I,10)
+    }
+    for(I=10,NumHolo){
+        holoParent(I,Base)
+    }
+    
+    I=0
+}
+elseif(I==0){
+    if(O:weapon():type()=="weapon_physgun"){
+        O:weapon():setAlpha(0)
+        Hold=0
+    }
+    else{
+        Hold=1
+        O:weapon():setAlpha(255)
+    }
+    
+    if($Hold){
+        if(Hold==0){
+            holoPos(0,O:attachmentPos("anim_attachment_RH"))
+            holoAng(0,O:attachmentAng("anim_attachment_RH"))
+            holoParentAttachment(0,O,"anim_attachment_RH")
+            holoAng(1,Pivot:toWorld(ang(80,-12,180)))
+            holoPos(1,Pivot:toWorld(vec(3.5,-1,-4)))
+            
+        }
+        elseif(Hold==1){
+            holoPos(0,O:attachmentPos("chest"))
+            holoAng(0,O:attachmentAng("chest"))
+            holoParentAttachment(0,O,"chest")
+            holoAng(1,Pivot:toWorld(ang(0,0,0)))
+            holoPos(1,Pivot:toWorld(vec(-16,0,0)))
+        }
+    }
+}
+
+
+if(changed(owner():keyAttack2()) && O:weapon():type()=="weapon_physgun") 
+{
+    Ent:setPos(owner():attachmentPos("anim_attachment_RH") + vec(480,0,0):rotate(owner():eyeAngles()))
+    Ent:setAng(owner():eyeAngles() - ang(90,0,180)) 
+    Ent:parentToAttachment(owner(),"anim_attachment_RH")
+    owner():soundPlay("gluon",99999,"thrusters/rocket02.wav",0) 
+    owner():emitSound("beams/beamstart5.wav")
+} 
+if(owner():keyAttack2() && O:weapon():type()=="weapon_physgun") 
+{
+    C++
+    Rn = owner():eyeTrace()
+    if(Rn:entity():isValid() && Rn:distance() < 500 && Rn:entity() != LastVic) { #
+        E = propSpawn("models/props_phx/ww2bomb.mdl",Rn:entity():pos(),1)    
+        E:propBreak()
+        B = propSpawn("models/props_phx/ww2bomb.mdl",Rn:entity():pos(),1)    
+        B:propBreak()
+        Rn:entity():applyForce(owner():forward()*5000*Rn:entity():mass())
+        LastVic = Rn:entity()
+    }
+    if(C % 75 == 0) 
+    {
+        if(Rn:entity():isValid() && Rn:distance() < 500 && Rn:entity() == LastVic) 
+        {
+            F = propSpawn("models/props_phx/ww2bomb.mdl",Rn:entity():pos(),1)    
+            F:propBreak()
+            Rn:entity():applyForce(owner():forward()*5000*Rn:entity():mass())
+        }
+        owner():emitSound("ambient/energy/zap" + randint(8)+ ".wav")
+    }
+}
+else
+{
+    Ent:deparent()
+   Ent:setPos(vec(0,0,-600)) 
+    soundStop("gluon")
+}

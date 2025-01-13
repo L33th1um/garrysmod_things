@@ -1,0 +1,29 @@
+@name 
+@inputs Forcer:wirelink
+@outputs 
+@persist T:entity RAng
+@strict
+runOnTick(1)
+
+if(owner():keyAttack2()) 
+{
+    Forcer["Velocity",number] = -1000000
+    if(owner():eyeTrace():entity():isValid()) {
+        T = owner():eyeTrace():entity()
+        #print(T:type())
+    }
+}
+
+if(owner():keyReload()) 
+{
+    T = entity()       
+}
+RAng += 10
+if(T:isValid()) {
+    Victim = T:pos()
+    NewPos = Victim + vec(200 * cos(RAng), 200 * sin(RAng), 0)
+    Y = atan2( -NewPos:y() + Victim:y(), -NewPos:x() + Victim:x() ) * 180 / pi()
+    SAng = ang(90, Y, 0)
+    Forcer:entity():setAng(SAng)
+    Forcer:entity():setPos(NewPos + vec(0,0,T:height()/2))
+}
