@@ -1,0 +1,50 @@
+--@name no
+--@author BadassPlov
+--@server
+
+
+hook.add("tick","no",function() 
+    local e = find.inSphere(owner():getPos(),5000, function(ent) return ent:isPlayer() && ent != owner() end)
+    local p = find.closest(e,owner():getPos())
+    //for i,p in ipairs(pls) do
+        if p == owner() then return end
+        p.tl = find.inCone(p:getEyePos(),p:getForward(),5000,0.866, function(ent)
+            return ent != p.b && ent == owner()
+        end)
+        //print(p)
+        p.vic = find.closest(p.tl,p:getEyePos())
+        if p.vic == nil then return end
+        if(p.vic:isValid()) then
+            //print(p)
+            if(p.bl == nil || !p.bl:isValid()) then
+                p.bl = prop.create(p:getEyePos(),p:getEyeAngles() - Angle(90,0,0),"models/hunter/plates/plate075x075.mdl", true)
+                p.bl:setNocollideAll(true)
+                p.bl:setColor(Color(0,0,0,0))
+            else
+                p.bl:setPos(p:getEyePos()+ p:worldToLocalVector(p:getForward()*20))
+                p.bl:setAngles(p:getEyeAngles() - Angle(90,0,0))
+            end 
+        end
+    //end
+            
+end)
+
+
+
+/*
+hook.add("Think","nigga",function() 
+    tl = find.byModel("models/props_phx/mk-82.mdl")
+    local v = find.closest(tl,owner():getPos())
+    if(owner():keyDown(IN_KEY.RELOAD)) then
+        tr = owner():getEyeTrace()
+        if !tr.Entity:isValid() then return end
+        forcer = tr.Entity
+    end
+    if forcer == nil then return end
+    if !v:isValid() then return end
+    local NewPos = v:getPos() + Vector(200 * math.cos(RAng), 200 * math.sin(RAng), 0)
+    forcer:setAngles(LookAtDeg(NewPos,forcer:getPos()) - Angle(90,0,-90))   
+    forcer:setPos(NewPos + Vector(0,0,20))  
+    RAng = RAng + 1
+end)
+*/

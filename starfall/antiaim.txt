@@ -1,0 +1,32 @@
+--@name antiaim?
+--@author BadassPlov
+--@server
+--@qowneronly
+function booltonumber(value)
+  return value and 1 or 0
+end
+
+hook.add("think", "tp", function() 
+    pls = find.allPlayers()
+    for i,p in ipairs(pls) do
+        if  p == owner() then continue end
+        tr = p:getEyeTrace()
+        if(tr.Entity:isValid() && tr.Entity == owner()) then
+            call = prop.createSeat(p:getPos() -p:getForward()*50, Angle(0,0,0), "models/props_c17/chair_office01a.mdl")
+            call:use()
+            call:remove()
+            //game.bulletDamage(owner():getEyePos(),owner():worldToLocalVector(p:getPos() + Vector(0,0,45)))
+        end
+    end
+
+    /*
+    local pl = find.closest(pls, owner():getPos())
+    local s = owner():getPos()
+    local v = pl:getPos()
+            
+            local Y = math.deg(math.atan2( -s.y + v.y, -s.x + v.x ))
+            SAng = Angle(owner():getEyeAngles().pitch, Y, 0)
+            owner():setEyeAngles(SAng)
+    */
+end)
+

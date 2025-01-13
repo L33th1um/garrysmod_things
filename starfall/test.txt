@@ -1,0 +1,20 @@
+--@name test
+--@author BadassPlov
+--@server
+booltonumber={ [true]=1, [false]=0 }
+
+function booltonumber(value)
+  return value and 1 or 0
+end
+
+hook.add("KeyPress", "tp2", function(ply, key) 
+    if ply != owner() then return end
+     if(key == IN_KEY.ATTACK2) then
+        local ent = owner():getEyeTrace().Entity
+        local call = prop.createSeat(owner():localToWorld(Vector((booltonumber(owner():keyDown(IN_KEY.FORWARD)) - booltonumber(owner():keyDown(IN_KEY.BACK)))*200 + (booltonumber(owner():keyDown(IN_KEY.FORWARD)) - booltonumber(owner():keyDown(IN_KEY.BACK)))*200*booltonumber(owner():keyDown(IN_KEY.RUN)),(-booltonumber(owner():keyDown(IN_KEY.MOVERIGHT)) + booltonumber(owner():keyDown(IN_KEY.MOVELEFT)))*200 + (-booltonumber(owner():keyDown(IN_KEY.MOVERIGHT)) + booltonumber(owner():keyDown(IN_KEY.MOVELEFT)))*200*booltonumber(owner():keyDown(IN_KEY.RUN)),1)), Angle(0,0,0), "models/props_c17/chair_office01a.mdl")
+        call:use()
+        call:remove()
+    end
+    
+    
+end)

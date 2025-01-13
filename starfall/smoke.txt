@@ -1,0 +1,33 @@
+--@name smoke
+--@author BadassPlov
+--@server
+hook.add("think", "nigga", function ()
+    local ls = find.byModel("models/props_foliage/shrub_small.mdl")
+    for i,v in ipairs(ls) do
+        //if(v:getOwner() == owner()) then
+            local scale = - 3/v.c + 4
+            local alpha = -math.sqrt(math.exp(v.c-420)) + 200
+            v:setScale(Vector(scale*1.5,scale*1.5,scale))
+            v:setColor(Color(200,200,200,alpha))
+            v.c = v.c + 1 
+            if alpha < 0 then v:remove() end
+        //end    
+    end
+end)
+
+hook.add("KeyPress", "smoke", function(ply, key) 
+    if ply != owner() then return end
+     if(key == IN_KEY.ATTACK2 && owner():getActiveWeapon():getClass() == "weapon_crowbar") then
+        local frag = prop.create(owner():getEyePos(), owner():getEyeAngles(), "models/Items/grenadeAmmo.mdl")
+        frag:emitSound("weapons/grenade/tick1.wav")
+        frag:setTrails(32,0,5,"trails/smoke", Color(200,200,200))
+        frag:getPhysicsObject():setVelocity(frag:getForward() * 500 * frag:getMass() + Vector(0,0,50) + owner():getVelocity())
+        timer.simple(2, function()
+            local holo = holograms.create(frag:getPos(), Angle(), "models/props_foliage/shrub_small.mdl", Vector(0,0,0))
+            holo:setMaterial("effects/fake_fog01b")
+            holo:emitSound("weapons/smokegrenade/smoke_emit.wav")
+            holo.c = 0
+            frag:remove()
+        end)
+    end
+end)

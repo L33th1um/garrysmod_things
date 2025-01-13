@@ -1,0 +1,95 @@
+--@name leethium smoke
+--@author BadassPlov
+--@server
+local switch = false
+users = {}
+
+
+local switch = false
+local users = {}
+
+hook.add("think", "smoke", function()
+    local ls = find.byModel("models/props_foliage/shrub_small.mdl", function(ent)
+        return ent:getClass() == "starfall_hologram"
+    end)
+
+    local playersInSmoke = {}
+
+    for _, smoke in ipairs(ls) do
+        smoke.c = (smoke.c or 1) + 1
+        local scale = math.max(0.1, 4 - 3 / smoke.c)
+        local alpha = -math.sqrt(math.exp(smoke.c-600)) + 100 //local alpha = math.max(0, 100 - math.sqrt(smoke.c))
+        smoke:setScale(Vector(scale * 2, scale * 2, scale / 4))
+        smoke:setColor(Color(255, 127, 73, alpha))
+
+        smoke.tl = find.inSphere(smoke:getPos(), 200)
+
+        for _, entity in ipairs(smoke.tl) do
+            if entity:isPlayer() && entity != owner() then
+                local index = entity:entIndex()
+                playersInSmoke[index] = entity
+            end
+        end
+
+        if alpha <= 0 then
+            smoke:remove()
+            for k in pairs(smoke.tl) do smoke.tl[k] = nil end
+        end
+    end
+
+    -- Remove players who have exited all smoke clouds
+    for index, player in pairs(users) do
+        if not playersInSmoke[index] then
+            if player.dome and player.dome:isValid() then
+                player.dome:remove()
+                player.dome = nil
+            end
+            users[index] = nil
+            //print("Player " .. index .. " removed from users table.")
+        end
+    end
+
+    -- Add players who are still in the smoke to the users table and create domes
+    for index, player in pairs(playersInSmoke) do
+        if not users[index] then
+            users[index] = player
+            if not player.dome or not player.dome:isValid() then
+                local dome = holograms.create(player:getEyePos(), Angle(0, 0, 0), "models/holograms/hq_stube_thin.mdl", Vector(5, 5, 10))
+                dome:setParent(player, "eyes")
+                dome:setMaterial("shadertest/unlitsinglecolor")
+                dome:setColor(Color(0, 0, 0))
+                player.dome = dome
+            end
+        end
+    end
+end)
+
+hook.add("KeyPress", "smoke", function(ply, key) 
+    if ply != owner() then return end
+     if(key == IN_KEY.ATTACK2 && owner():getActiveWeapon():getClass() == "weapon_crowbar") then
+        local frag = prop.create(owner():getEyePos() + owner():worldToLocalVector(owner():getForward()*20), owner():getEyeAngles(), "models/Items/grenadeAmmo.mdl")
+        frag:emitSound("weapons/grenade/tick1.wav")
+        frag:setTrails(16,0,5,"trails/smoke", Color(255,127,73))
+        frag:getPhysicsObject():setVelocity(frag:getForward() * 500 * frag:getMass() + Vector(0,0,50) + owner():getVelocity())
+        timer.simple(2, function()
+            local holo = holograms.create(frag:getPos(), Angle(), "models/props_foliage/shrub_small.mdl", Vector(0,0,0))
+            holo:setMaterial("effects/fake_fog01b")
+            holo:emitSound("weapons/smokegrenade/smoke_emit.wav")
+            holo.c = 0
+            frag:remove()
+        end)
+    end
+    if(key == IN_KEY.WALK) then
+        if(switch == false) then
+            door = hologram.create(owner():getEyePos() + owner():worldToLocalVector(owner():getForward()*20), owner():getEyeAngles() - Angle(-90,180,0), "models/props_phx/wheelaxis.mdl")        
+            door:setParent(owner())
+            door:setMaterial("models/props_combine/tprings_globe")  
+            
+            //print("niggaq")
+            switch = true  
+        else
+            door:remove()
+            switch = false
+        end
+    end
+end)

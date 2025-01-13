@@ -1,0 +1,5 @@
+--@name tptest
+--@author BadassPlov
+--@shared
+
+owner():setPos(chip():getPos())
